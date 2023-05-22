@@ -1,0 +1,10 @@
+{
+  "port": 8080,
+  "connectionString": "server=localhost;Trusted_Connection=Yes;database=EXH_3DCamera",
+  "launchBrowser": false,
+  "authorization": {
+    "key": "aabbccddAABBCCDD",
+    "userName": "zoe123456",
+    "password": "123456"
+  }
+}

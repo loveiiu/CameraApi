@@ -1,0 +1,4 @@
+webapi/bin/debug/
+.vs/
+webapi/obj/debug/
+webapi/obj/release/

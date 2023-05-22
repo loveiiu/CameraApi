@@ -1,0 +1,160 @@
+﻿@{
+    ViewData["Title"] = "Home page";
+    Layout = "_Layout";
+}
+
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+<input type="radio" id="byDate" name="reportType" value="1" />By Date
+<input type="radio" id="byHours" name="reportType" value="2" />By Hours
+<div style="display:flex;">
+    <input type="text" id="startDate" style="display:block;">
+    &nbsp;&nbsp;
+    <input type="text" id="endDate" style="display:none;">
+</div>
+<div id="cameraId"></div>
+<button id="query">查詢</button>
+<div id="container" style="width:100%; height:400px;"></div>
+<script>
+    function getPeopleCount() {
+        var checkBox = $('#cameraId').find('input:checkbox:checked');
+        console.log(checkBox);
+        var cameraIds = new Array();
+        for (var t = 0; t < checkBox.length; t++) {
+            cameraIds.push(checkBox[t].defaultValue);
+        }
+        var str = {
+            "cameraIds": cameraIds,
+            "reportType": $("[name='reportType']:checked").val(),
+            "searchDate": $('#startDate').val(),
+            "startTime": "",
+            "endTime": "",
+            "startDate": $('#startDate').val(),
+            "endDate": $('#endDate').val()
+        }
+        var result = new Array();
+        var series = new Array();
+        var auth =
+        {
+            "userName":"@ViewBag.userName",
+            "password":"@ViewBag.password"
+                }
+        $.ajax({
+            type: "POST",
+            url: "api/camera/LoginJwt",
+            data: JSON.stringify(auth),
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            success: function (res) {
+                if (res.code != 1000) {
+                    alert(res.message);
+                    return;
+                }
+                if (res.data.result == true) {
+                    var authToken = "Bearer " + res.data.token;
+                    $.ajax({
+                        type: "POST",
+                        url: "api/camera/CameraQuery",
+                        headers: { "Authorization": "" + authToken + "" },
+                        data: JSON.stringify(str),
+                        dataType: "json",
+                        contentType: "application/json; charset=utf-8",
+                        success: function (res) {
+                            if (res.code != 1000) {
+                                alert(res.message);
+                                return;
+                            }
+                            if (res.data.reportType == 1) {
+                                for (var i = 0; i < res.data.cameras.length; i++) {
+                                    for (var j = 0; j < res.data.cameras[i].cameraDetail.length; j++) {
+                                        result.push({ name: res.data.cameras[i].cameraDetail[j].searchDate + 'people in', y: res.data.cameras[i].cameraDetail[j].peopleIn })
+                                        result.push({ name: res.data.cameras[i].cameraDetail[j].searchDate + 'people out', y: res.data.cameras[i].cameraDetail[j].peopleOut })
+                                    }
+                                    series.push({
+                                        name: res.data.cameras[i].cameraId,
+                                        colorByPoint: false,
+                                        data: result
+                                    });
+                                    result = new Array();
+                                }
+                            }
+                            if (res.data.reportType == 2) {
+                                for (var i = 0; i < res.data.cameras.length; i++) {
+                                    for (var j = 0; j < res.data.cameras[i].cameraDetail.length; j++) {
+                                        result.push({ name: res.data.cameras[i].cameraDetail[j].searchHour + 'people in', y: res.data.cameras[i].cameraDetail[j].peopleIn })
+                                        result.push({ name: res.data.cameras[i].cameraDetail[j].searchHour + 'people out', y: res.data.cameras[i].cameraDetail[j].peopleOut })
+                                    }
+                                    series.push({
+                                        name: res.data.cameras[i].cameraId,
+                                        colorByPoint: false,
+                                        data: result
+                                    });
+                                    result = new Array();
+                                }
+                            }
+                            var myChart = Highcharts.chart('container', {
+                                chart: {
+                                    type: 'column'
+                                },
+                                title: {
+                                    text: 'Query'
+                                },
+                                xAxis: {
+                                    type: 'category'
+                                },
+                                yAxis: {
+                                    title: {
+                                        text: '單位：人數',
+                                    },
+                                },
+                                series: series,
+                            });
+                        }
+                    });
+                }
+            }
+        });
+    }
+    function getCameras() {
+        $.ajax({
+            type: "POST",
+            url: "api/camera/GetCameras",
+            data: {},
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            success: function (res) {
+                if (res.code != 1000) {
+                    alert(res.message);
+                    return;
+                }
+                for (var i = 0; i < res.data.length; i++) {
+                    var item = ' <input type="checkbox" id="' + res.data[i].sectionSpaceId + '" name="tag" value="' + res.data[i].sectionSpaceId + '" /><label for="' + res.data[i].sectionSpaceId + '">' + res.data[i].name + '</label> &nbsp;';
+                    $('#cameraId').append(item);
+                }
+
+                console.log(res)
+            }
+        });
+    }
+    $('#query').on('click', function () {
+        getPeopleCount();
+    });
+    $(document).ready(function () {
+        getCameras()
+    });
+    $("[name = 'reportType']").on('click', function ()
+    {
+        if ($("[name='reportType']:checked").val() == 1) { $('#endDate').attr('style', 'display:block') }
+        if ($("[name='reportType']:checked").val() == 2) { $('#endDate').attr('style', 'display:none') }
+    });
+
+</script>
+<script>
+    var $j = jQuery.noConflict();
+    $j(function () {
+        $j("#startDate").datepicker();
+        $j("#endDate").datepicker();
+    });
+</script>

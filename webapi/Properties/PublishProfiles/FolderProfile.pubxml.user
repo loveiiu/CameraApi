@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+https://go.microsoft.com/fwlink/?LinkID=208121. 
+-->
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <_PublishTargetUrl>C:\Users\HPP\source\repos\webapi\webapi\bin\Release\net5.0\publish\</_PublishTargetUrl>
+    <History>True|2022-07-19T14:03:44.1128080Z;True|2022-07-19T17:55:19.8911670+08:00;True|2022-07-19T12:35:32.6891925+08:00;True|2022-07-19T01:04:35.3292771+08:00;True|2022-07-15T18:14:26.1775639+08:00;True|2022-07-15T17:48:19.6727934+08:00;True|2022-07-15T15:04:52.5246118+08:00;</History>
+  </PropertyGroup>
+</Project>
